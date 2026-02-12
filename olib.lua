@@ -664,8 +664,14 @@ function OrionLib:MakeWindow(WindowConfig)
 	end)
 
 	AddConnection(UserInputService.InputBegan, function(Input)
-		if Input.KeyCode == Enum.KeyCode.RightShift and UIHidden then
-			MainWindow.Visible = true
+		if Input.KeyCode == Enum.KeyCode.RightShift then
+			if UIHidden or not MainWindow.Visible then
+				MainWindow.Visible = true
+				UIHidden = false
+			else
+				MainWindow.Visible = false
+				UIHidden = true
+			end
 		end
 	end)
 
@@ -1179,7 +1185,7 @@ function OrionLib:MakeWindow(WindowConfig)
 								Name = "Title"
 							}), "Text")
 						}), {
-							Parent = DropdownContainer,
+							Parent = DropdownList,
 							Size = UDim2.new(1, 0, 0, 28),
 							BackgroundTransparency = 1,
 							ClipsDescendants = true
@@ -1197,13 +1203,25 @@ function OrionLib:MakeWindow(WindowConfig)
 				function Dropdown:Refresh(Options, Delete)
 					if Delete then
 						for _,v in pairs(Dropdown.Buttons) do
-							v:Destroy()
+							pcall(function() v:Destroy() end)
 						end    
-						table.clear(Dropdown.Options)
-						table.clear(Dropdown.Buttons)
+						Dropdown.Options = {}
+						Dropdown.Buttons = {}
 					end
-					Dropdown.Options = Options
-					AddOptions(Dropdown.Options)
+					for _, Option in pairs(Options) do
+						if not table.find(Dropdown.Options, Option) then
+							table.insert(Dropdown.Options, Option)
+						end
+					end
+					AddOptions(Options)
+					wait(0.1)
+					if Dropdown.Toggled then
+						if #Dropdown.Options > MaxElements then
+							DropdownFrame.Size = UDim2.new(1, 0, 0, 38 + (MaxElements * 28))
+						else
+							DropdownFrame.Size = UDim2.new(1, 0, 0, DropdownList.AbsoluteContentSize.Y + 38)
+						end
+					end
 				end  
 
 				function Dropdown:Set(Value)
