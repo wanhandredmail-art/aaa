@@ -30,8 +30,20 @@ local OrionLib = {
 --Feather Icons https://github.com/evoincorp/lucideblox/tree/master/src/modules/util - Created by 7kayoh
 local Icons = {}
 
+local Success, Response = pcall(function()
+	Icons = HttpService:JSONDecode(game:HttpGetAsync("https://raw.githubusercontent.com/evoincorp/lucideblox/master/src/modules/util/icons.json")).icons
+end)
+
+if not Success then
+	warn("\nOrion Library - Failed to load Feather Icons. Error code: " .. Response .. "\n")
+end	
+
 local function GetIcon(IconName)
-	return "rbxassetid://4483345998"
+	if Icons[IconName] ~= nil then
+		return Icons[IconName]
+	else
+		return nil
+	end
 end   
 
 local Orion = Instance.new("ScreenGui")
@@ -652,14 +664,8 @@ function OrionLib:MakeWindow(WindowConfig)
 	end)
 
 	AddConnection(UserInputService.InputBegan, function(Input)
-		if Input.KeyCode == Enum.KeyCode.RightShift then
-			if UIHidden or not MainWindow.Visible then
-				MainWindow.Visible = true
-				UIHidden = false
-			else
-				MainWindow.Visible = false
-				UIHidden = true
-			end
+		if Input.KeyCode == Enum.KeyCode.RightShift and UIHidden then
+			MainWindow.Visible = true
 		end
 	end)
 
@@ -1173,7 +1179,7 @@ function OrionLib:MakeWindow(WindowConfig)
 								Name = "Title"
 							}), "Text")
 						}), {
-							Parent = DropdownList,
+							Parent = DropdownContainer,
 							Size = UDim2.new(1, 0, 0, 28),
 							BackgroundTransparency = 1,
 							ClipsDescendants = true
@@ -1193,11 +1199,11 @@ function OrionLib:MakeWindow(WindowConfig)
 						for _,v in pairs(Dropdown.Buttons) do
 							v:Destroy()
 						end    
-						Dropdown.Options = {}
-						Dropdown.Buttons = {}
+						table.clear(Dropdown.Options)
+						table.clear(Dropdown.Buttons)
 					end
 					Dropdown.Options = Options
-					AddOptions(Options)
+					AddOptions(Dropdown.Options)
 				end  
 
 				function Dropdown:Set(Value)
