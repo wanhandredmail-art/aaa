@@ -1191,25 +1191,13 @@ function OrionLib:MakeWindow(WindowConfig)
 				function Dropdown:Refresh(Options, Delete)
 					if Delete then
 						for _,v in pairs(Dropdown.Buttons) do
-							pcall(function() v:Destroy() end)
+							v:Destroy()
 						end    
 						Dropdown.Options = {}
 						Dropdown.Buttons = {}
 					end
-					for _, Option in pairs(Options) do
-						if not table.find(Dropdown.Options, Option) then
-							table.insert(Dropdown.Options, Option)
-						end
-					end
+					Dropdown.Options = Options
 					AddOptions(Options)
-					wait(0.1)
-					if Dropdown.Toggled then
-						if #Dropdown.Options > MaxElements then
-							DropdownFrame.Size = UDim2.new(1, 0, 0, 38 + (MaxElements * 28))
-						else
-							DropdownFrame.Size = UDim2.new(1, 0, 0, DropdownList.AbsoluteContentSize.Y + 38)
-						end
-					end
 				end  
 
 				function Dropdown:Set(Value)
